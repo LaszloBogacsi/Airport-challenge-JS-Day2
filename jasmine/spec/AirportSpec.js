@@ -1,32 +1,58 @@
-describe("Airport", function(){
+describe('Airport', function(){
   var airport;
   var plane;
+  var weather;
 
-  beforeEach(function(){
+  beforeEach(function() {
     airport = new Airport();
     plane = new Plane();
+    weather = new Weather();
   });
 
-  it('can accept a plane to land', function(){
-    airport.acceptPlane(plane);
-    expect(airport.planes[0]).toEqual(plane);
+  it('allows a plane to land', function(){
+    airport.land(plane);
+    expect(airport.planes).toEqual([plane]);
   });
-  it('can depart a plane', function(){
-    airport.acceptPlane(plane);
-    airport.planeDeparts(plane);
+
+  it('allows a plane to take off', function(){
+    airport.land(plane);
+    airport.takeOff();
     expect(airport.planes).toEqual([]);
   });
 
-  it('can confirm if a plane is present', function(){
-    var say = function (something) {
-
-      console.log("hello again");
-      return something;
-    };
-    var planeCheck = airport.isPlanePresent;
-
-    expect(airport.isPlanePresent(plane)).toBe(false);
-    airport.acceptPlane(plane);
-    expect(airport.isPlanePresent(plane)).toBe(true);
+  it('has a default capacity (50)', function(){
+    expect(airport.capacity).toEqual(50);
   });
+
+  it('can set the capacity', function(){
+    var newCapacity = 30;
+    airport.setCapacity(newCapacity);
+    expect(airport.capacity).toEqual(newCapacity);
+  });
+
+  it('at landing it throws an error if airport is full', function(){
+    // var newCapacity = 50;
+    // airport.setCapacity(newCapacity);
+    for (i = 0; i < 50; i++) {
+      airport.land(plane);
+    }
+    expect(function() {airport.land(plane);}).toThrowError('The airport is full');
+  });
+  it('can check the actual weather', function(){
+    expect(airport.actualWeather(weather)).toEqual(airport.stormyWeather);
+  });
+  it('prevents take off is weather is stormy', function(){
+    airport.land(plane);
+
+    spyOn(weather, 'storm').and.returnValue(true);
+    airport.actualWeather(weather);
+    expect(function () {airport.takeOff();}).toThrowError('No take off due to bad weather conditions');
+  });
+  it('prevents take off is weather is stormy', function(){
+
+    spyOn(weather, 'storm').and.returnValue(true);
+    airport.actualWeather(weather);
+    expect(function () {airport.land(plane);}).toThrowError('No landing due to bad weather conditions');
+  });
+
 });
